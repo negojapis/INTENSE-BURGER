@@ -6,7 +6,7 @@ import { MessageCircle } from "lucide-react";
 export default function CTA() {
   return (
     <section className="py-20 sm:py-28 bg-gradient-to-b from-[#0a0a0a] to-bite-black border-t border-white/5 relative overflow-hidden">
-      <div className="max-w-4xl mx-auto px-6 sm:px-8 md:px-12 relative z-10 text-center">
+      <div className="site-container relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -298,7 +298,7 @@ const DifferentialBack = () => (
 export default function About() {
   return (
     <section id="sobre" className="py-20 sm:py-28 bg-bite-black border-t border-bite-white/5 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12">
+      <div className="site-container">
         <div className="text-center mb-12 sm:mb-16">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}

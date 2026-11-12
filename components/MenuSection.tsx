@@ -221,7 +221,7 @@ export default function MenuSection() {
       {/* Luz ambiente sutil */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-bite-red-dark/15 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12 relative z-10">
+      <div className="site-container relative z-10">
         {/* 1. Seção Hambúrgueres */}
         <div className="text-center mb-12 sm:mb-16">
           <motion.h2
