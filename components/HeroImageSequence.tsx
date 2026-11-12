@@ -6,97 +6,140 @@ const TOTAL_FRAMES = 80;
 
 export default function HeroImageSequence() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const [firstFrameLoaded, setFirstFrameLoaded] = useState(false);
+  const [allLoaded, setAllLoaded] = useState(false);
 
   useEffect(() => {
-    // Preload images
-    const loadedImages: HTMLImageElement[] = [];
+    let isMounted = true;
+    const loadedImages: HTMLImageElement[] = new Array(TOTAL_FRAMES);
     let loadedCount = 0;
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       const img = new Image();
+      img.decoding = "async";
       const num = i.toString().padStart(3, "0");
       img.src = `/images/sequence/frame-${num}.jpg`;
 
       img.onload = () => {
+        if (!isMounted) return;
+        loadedImages[i] = img;
         loadedCount++;
-        if (loadedCount === TOTAL_FRAMES) {
-          setImages(loadedImages);
-          setLoaded(true);
+
+        if (i === 0) {
+          imagesRef.current = loadedImages;
+          setFirstFrameLoaded(true);
         }
-      };
-      // Em caso de erro, conta igual para não travar
-      img.onerror = () => {
-        loadedCount++;
+
         if (loadedCount === TOTAL_FRAMES) {
-          setImages(loadedImages);
-          setLoaded(true);
+          imagesRef.current = loadedImages;
+          setAllLoaded(true);
         }
       };
 
-      loadedImages.push(img);
+      img.onerror = () => {
+        if (!isMounted) return;
+        loadedCount++;
+        if (loadedCount === TOTAL_FRAMES) {
+          imagesRef.current = loadedImages;
+          setAllLoaded(true);
+        }
+      };
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!loaded || images.length === 0) return;
+    if (!firstFrameLoaded) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // Set canvas dimensions based on the first image
-    // Find first valid image
-    const firstValid = images.find(img => img.width > 0);
-    if (firstValid) {
-      canvas.width = firstValid.width;
-      canvas.height = firstValid.height;
+    const firstImg = imagesRef.current[0];
+    if (firstImg && firstImg.width > 0) {
+      canvas.width = firstImg.width;
+      canvas.height = firstImg.height;
     }
 
-    let currentFrame = 0;
-    let animationFrameId: number;
-    let lastTime = 0;
-    const fps = 6;
-    const interval = 1000 / fps;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
-    const render = () => {
-      const img = images[currentFrame];
-      if (img && img.width > 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      }
-      currentFrame = (currentFrame + 1) % TOTAL_FRAMES;
+    const drawFrame = (frameIndex: number) => {
+      const img = imagesRef.current[frameIndex];
+      if (!img || img.width === 0) return;
+
+      // Recorta sutilmente 3.5% da borda inferior/direita para ocultar marca d'água do canto e manter nitidez máxima
+      const cropW = img.width * 0.965;
+      const cropH = img.height * 0.965;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(
+        img,
+        0,
+        0,
+        cropW,
+        cropH,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
     };
+
+    // Desenha o primeiro frame imediatamente
+    drawFrame(0);
+
+    if (!allLoaded) return;
+
+    let currentFrame = 0;
+    let direction = 1; // Ping-pong loop suave (0 -> 79 -> 0) sem corte brusco
+    let animationFrameId: number;
+    let lastTime = performance.now();
+    const fps = 24;
+    const interval = 1000 / fps;
 
     const animate = (time: number) => {
       animationFrameId = requestAnimationFrame(animate);
       const deltaTime = time - lastTime;
 
-      if (deltaTime > interval) {
-        render();
+      if (deltaTime >= interval) {
+        drawFrame(currentFrame);
+
+        currentFrame += direction;
+        if (currentFrame >= TOTAL_FRAMES - 1) {
+          currentFrame = TOTAL_FRAMES - 1;
+          direction = -1;
+        } else if (currentFrame <= 0) {
+          currentFrame = 0;
+          direction = 1;
+        }
+
         lastTime = time - (deltaTime % interval);
       }
     };
 
-    // Primeira renderização imediata
-    render();
     animationFrameId = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [loaded, images]);
+  }, [firstFrameLoaded, allLoaded]);
 
   return (
-    <div className="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none z-0">
-      {!loaded && (
+    <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden bg-black">
+      {!firstFrameLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
-          <div className="w-12 h-12 border-4 border-bite-cheddar border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-3 border-bite-cheddar border-t-transparent rounded-full animate-spin" />
         </div>
       )}
       <canvas
         ref={canvasRef}
-        className={`w-full h-full object-cover transition-opacity duration-1000 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover object-[72%_center] lg:object-center contrast-[1.06] saturate-[1.08] transition-opacity duration-700 ${
+          firstFrameLoaded ? "opacity-90 lg:opacity-100" : "opacity-0"
+        }`}
       />
     </div>
   );

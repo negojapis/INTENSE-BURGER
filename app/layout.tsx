@@ -13,7 +13,7 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "BITEFAST - Burger House",
+  title: "INTENSE BURGER - Burger House",
   description: "Hambúrguer artesanal, cheddar exagerado e uma experiência feita para quem busca sabor de verdade.",
   icons: {
     icon: [

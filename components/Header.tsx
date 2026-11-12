@@ -39,8 +39,7 @@ export default function Header() {
   const navItems = [
     { name: "Home", href: "#home", num: "01" },
     { name: "Menu", href: "#menu", num: "02" },
-    { name: "Ofertas", href: "#ofertas", num: "03" },
-    { name: "Sobre", href: "#sobre", num: "04" },
+    { name: "Sobre", href: "#sobre", num: "03" },
   ];
 
   return (
@@ -62,8 +61,8 @@ export default function Header() {
             onClick={() => setMenuOpen(false)}
             className="flex flex-col group z-50 focus:outline-none"
           >
-            <span className="font-oswald text-3xl font-bold text-bite-white leading-none tracking-wider group-hover:text-bite-cheddar transition-colors">
-              BITEFAST
+            <span className="font-oswald text-3xl font-bold text-bite-white leading-none tracking-wider group-hover:text-bite-cheddar transition-colors uppercase">
+              INTENSE BURGER
             </span>
             <span className="text-bite-cheddar text-xs font-semibold tracking-widest uppercase mt-1">
               Burger House
@@ -125,8 +124,8 @@ export default function Header() {
               {/* Topo da Sessão Lateral */}
               <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-6">
                 <div>
-                  <span className="font-oswald text-2xl font-bold text-bite-white tracking-wider block">
-                    BITEFAST
+                  <span className="font-oswald text-2xl font-bold text-bite-white tracking-wider uppercase block">
+                    INTENSE BURGER
                   </span>
                   <span className="text-[10px] text-bite-cheddar font-semibold tracking-widest uppercase">
                     Burger House • Menu
